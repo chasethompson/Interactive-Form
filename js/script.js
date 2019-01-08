@@ -31,7 +31,8 @@ let total = 0;
 const $nameCheck = $('<span class="error-message" id="name-error">New form. Who dis?</span>');
 const $emailCheck = $('<span class="error-message" id="email-error">Where can we send your registration ticket?</span>');
 const $activityCheck = $('<span class="error-message" id="activity-error">Are you just going to loiter in the hallway?</span>');
-const $ccCheck = $('<span class="error-message" id="cc-error">Please enter a credit card number. Credit card numbers must be between 13 and 16 numbers.</span>');
+const $ccCheck = $('<span class="error-message" id="cc-error">Please enter a credit card number.</span>');
+const $ccNumCheck = $('<span class="error-message" id="cc-num-error">Credit card numbers must be between 13 and 16 numbers.</span>');
 const $zipCheck = $('<span class="error-message" id="zip-error">Please enter 5 digit zip code.</span>');
 const $cvvCheck = $('<span class="error-message" id="cvv-error">Please enter 3 digit CVV code on back of card.</span>');
 
@@ -40,6 +41,7 @@ $('#name-error').remove();
 $('#email-error').remove();
 $('#activity-error').remove();
 $('#cc-error').remove();
+$('#cc-num-error').remove();
 $('#zip-error').remove();
 $('#cvv-error').remove();
 
@@ -256,13 +258,16 @@ $registerButton.on('click', function(e){
         } else {
         $activityCheck.remove();
         }
-    // Credit card section
-    if(!legitCreditCard($ccNum.val())) {
+        // Credit card section
+    if ($('#cc-num').val() === '') {
         $ccNum.attr('class', 'not-valid');
         $registerButton.prev().append($ccCheck);
+    } else if ($ccNum.val() != '' || $ccNum.val() > 13 || $ccNum.val() < 16) {
+        $ccCheck.remove();
+        $registerButton.prev().append($ccNumCheck);
     } else {
         $('#cc-num').attr('class', '');
-        $ccCheck.remove();
+        $ccNumCheck.remove();
     }
     if(!legitZip($zipField.val())) {
         $zipField.attr('class', 'not-valid');
