@@ -64,40 +64,18 @@ $jobRole.on('change', function() {
 
 // Manage the Tshirt color section
 
-const resetColors = () => {
-    if ($shirtDesign.val() === 'Select Theme') {
-        $shirtColorDiv.hide();
+$shirtDesign.on('change', function() {
+    const value = $(this).val();
+    if(value === 'js puns'){
+        $('#colors-js-puns').show();
+        $("#color option:contains('I')").hide();
+        $("#color option:contains('Puns')").show();
+    } else if(value === 'heart js') {
+        $("#color option:contains('Puns')").hide();
+        $("#color option:contains('I')").show();
+    } else if(value === 'select theme'){
+        $('#colors-js-puns').hide();
     }
-}
-
-$shirtDesign.on('change', () => {
-    $shirtColorDiv.show();
-    switch ($shirtDesign.val()) {
-        case 'js puns' :
-            $colors.each(function() {
-                let puns = $(this).text();
-                    if (puns.indexOf("JS Puns") > -1) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-                $colors.eq(0).prop('selected', true)
-                break;
-
-        case 'heart js':
-                $colors.each(function() {
-                    let heart = $(this).text();
-                    if (heart.indexOf('JS shirt only') > -1) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-                $colors.eq(3).prop('selected', true)
-                break;
-    }
-    resetColors(); 
 });
 
 // Manage the Activity section, re-time check validation for activities happening at the same time. Disable concurrent activity if another at the same time is selected. Also appends total $ for all selected activities
@@ -156,15 +134,15 @@ $activityInput.on('change', function(e){
         $('.total').remove();
     }
     // Append the total
-    $activity.append($totalPrint);
+    $('.activities').append($totalPrint);
 });
 
 // Payment field adjustments
 // Remove 'Select method' option, set 'Credit Card' to default
 
 $('option[value="select_method"]').prop('disabled',true);
-$('option[value = "credit card"]').prop('selected', true);
-$('option[value="credit card"]').prop('class', 'selected');
+$('option[value = "credit card"]').prop('cc-selected', true);
+$('option[value="credit card"]').prop('class', 'cc-selected');
 // Show Credit card details, hide Bitcoin & Paypal divs
 $('#credit-card').show();
 $bitcoin.hide();
@@ -181,15 +159,16 @@ $payment.on('change', function(){
     $('.error-message').remove();
     // Manipulate section depending on selected option
     if(val === 'credit card') {
-        $('#credit-card').show().addClass('paymentValid');
+        $('#credit-card').show().addClass('cc-selected');
         $bitcoin.hide();
         $paypal.hide();
     } else if (val === 'paypal'){
-        $('#credit-card').hide().removeClass('paymentValid');
+        $('#credit-card').hide().removeClass('cc-selected');
         $bitcoin.hide();
-        $paypal.show();        
+        $paypal.show();
+
     } else if (val === 'bitcoin'){
-        $('#credit-card').hide().removeClass('paymentValid');
+        $('#credit-card').hide().removeClass('cc-selected');
         $bitcoin.show();
         $paypal.hide();  
     }
@@ -259,24 +238,24 @@ $registerButton.on('click', function(e){
         $activityCheck.remove();
         }
         // Credit card section
-    if ($('#cc-num').val() === '') {
+    if ($('#credit-card').hasClass('cc-selected')&&($('#cc-num').val() === '')) {
         $ccNum.attr('class', 'not-valid');
         $registerButton.prev().append($ccCheck);
-    } else if ($ccNum.val() != '' || $ccNum.val() > 13 || $ccNum.val() < 16) {
+    } else if ($('#credit-card').hasClass('cc-selected')&&($ccNum.val() != '' || $ccNum.val() > 13 || $ccNum.val() < 16)) {
         $ccCheck.remove();
         $registerButton.prev().append($ccNumCheck);
     } else {
         $('#cc-num').attr('class', '');
         $ccNumCheck.remove();
     }
-    if(!legitZip($zipField.val())) {
+    if($('#credit-card').hasClass('cc-selected')&&!legitZip($zipField.val())) {
         $zipField.attr('class', 'not-valid');
         $registerButton.prev().append($zipCheck);
     } else {
         $zipField.attr('class', '');
         $zipCheck.remove();
     }
-    if(!legitCVV($cvvField.val())) {
+    if($('#credit-card').hasClass('cc-selected')&&(!legitCVV($cvvField.val()))) {
         $cvvField.attr('class', 'not-valid');
         $registerButton.prev().append($cvvCheck);
     } else {
