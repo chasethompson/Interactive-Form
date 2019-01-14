@@ -3,82 +3,84 @@
 
 // Global variables
 
-const $form = $('form');
-const $nameField = $('#name');
-const $emailField = $('#mail');
-const $jobRole = $('#title');
-const $jobOtherRole = $('#other-title');
-const $ccNum = $('#cc-num');
-const $zipField = $('#zip');
-const $cvvField = $('#cvv');
+// Shirt color
+const $tshirtColor = $('#colors-js-puns');
+const $jsPuns = $("#color option:contains('Puns')");
+const $heart = $("#color option:contains('(I')");
+
+// Activity variables
+const $activity = $('.activites');
+const $activityInput = $('.activities input');
+let total = 0;
+
+// Payment variables
 const $bitcoin = $('div').last();
 const $paypal = $('div').last().prev();
 
-const $shirtDesign = $('#design');
-const $shirtColorDiv = $('#colors-js-puns');
-const $shirtColor = $('#color');
-const $colors = $('#color option');
+// Email regex validation from emailregex.com
+function legitEmail(email) {
+    var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regex.test(email);
+}
 
-const $activity = $('.activites');
-const $activityInput = $('.activities input');
-
-const $payment = $('#payment');
-const $registerButton = $('button');
-let total = 0;
-
-// Create and hide error messages
-
+// Error message text
 const $nameCheck = $('<span class="error-message" id="name-error">New form. Who dis?</span>');
-const $emailCheck = $('<span class="error-message" id="email-error">Where can we send your registration ticket?</span>');
+const $emailCheck = $('<span class="payment-error" id="email-error">Where can we send your registration ticket?</span>');
 const $activityCheck = $('<span class="error-message" id="activity-error">Are you just going to loiter in the hallway?</span>');
-const $ccCheck = $('<span class="error-message" id="cc-error">Please enter a credit card number.</span>');
-const $ccNumCheck = $('<span class="error-message" id="cc-num-error">Credit card numbers must be between 13 and 16 numbers.</span>');
-const $zipCheck = $('<span class="error-message" id="zip-error">Please enter 5 digit zip code.</span>');
-const $cvvCheck = $('<span class="error-message" id="cvv-error">Please enter 3 digit CVV code on back of card.</span>');
-
 
 $('#name-error').remove();
 $('#email-error').remove();
 $('#activity-error').remove();
-$('#cc-error').remove();
-$('#cc-num-error').remove();
-$('#zip-error').remove();
-$('#cvv-error').remove();
 
-// Setup initial look of form
+/* ================================= 
+Objective 1 Set focus on the first text field
+==================================== */
 
-$nameField.focus();
-$jobOtherRole.hide();
-$shirtColorDiv.hide();
+$('#name').focus();
 
-// Show text field when 'Other' role is selected
+/* ================================= 
+Objective 2 ”Job Role” section of the form
+==================================== */
 
-$jobRole.on('change', function() {
-    const selectedRole = $(this).val();
-    if(selectedRole === 'other'){
+$('#other-title').hide();
+
+$('div #title').on('change', function() {
+    const value = $(this).val();
+    if(value === 'other'){
         $('#other-title').show();
     } else {
         $('#other-title').hide();
     }
 });
 
-// Manage the Tshirt color section
+/* ================================= 
+Objective 3 ”T-Shirt Info” section of the form
+==================================== */
+ 
+$tshirtColor.hide();
 
-$shirtDesign.on('change', function() {
-    const value = $(this).val();
-    if(value === 'js puns'){
-        $('#colors-js-puns').show();
-        $("#color option:contains('I')").hide();
-        $("#color option:contains('Puns')").show();
-    } else if(value === 'heart js') {
-        $("#color option:contains('Puns')").hide();
-        $("#color option:contains('I')").show();
-    } else if(value === 'select theme'){
+const dropDownColor = ($optionOne, $optionTwo) => {
+    $tshirtColor.show();
+    $optionOne.hide();
+    $optionTwo.show();
+    $optionTwo.first().attr('selected','selected');
+    $optionOne.first().attr('selected',false);
+};
+
+$('#design').on('change', function() {
+    const color = $(this).val();
+    if(color === 'js puns'){
+        dropDownColor($heart, $jsPuns);
+    } else if(color ==='heart js') {
+        dropDownColor($jsPuns, $heart);
+    } else if(color === 'select theme'){
         $('#colors-js-puns').hide();
     }
 });
 
-// Manage the Activity section, re-time check validation for activities happening at the same time. Disable concurrent activity if another at the same time is selected. Also appends total $ for all selected activities
+/* ================================= 
+Objective 4 ”Register for Activities” section of the form
+==================================== */
 
 const activityNotAvailabile = (activity) => {
     const $notAvailability = $(`input[name=${activity}]`);
@@ -137,90 +139,75 @@ $activityInput.on('change', function(e){
     $('.activities').append($totalPrint);
 });
 
-// Payment field adjustments
-// Remove 'Select method' option, set 'Credit Card' to default
+/* ================================= 
+Objective 5 Payment Info section of the form
+==================================== */
 
-$('option[value="select_method"]').prop('disabled',true);
-$('option[value = "credit card"]').prop('cc-selected', true);
-$('option[value="credit card"]').prop('class', 'cc-selected');
+$('#payment option[value="select_method"]').attr('hidden', true);
+$('#payment option[value="credit card"]').attr('selected', true);
+$('#payment option[value="credit card"]').attr('class', 'selected');
 // Show Credit card details, hide Bitcoin & Paypal divs
 $('#credit-card').show();
 $bitcoin.hide();
 $paypal.hide();
 
-// Show/hide correct payment element
+/* ================================= 
+Objective 6 Form validation and messages
+==================================== */
 
-$payment.on('change', function(){
-    const val = $(this).val();
-    // Remove any possible previous errors
-    $ccNum.attr('class','');
-    $zipField.attr('class','');
-    $cvvField.attr('class','');
-    $('.error-message').remove();
-    // Manipulate section depending on selected option
-    if(val === 'credit card') {
-        $('#credit-card').show().addClass('cc-selected');
-        $bitcoin.hide();
-        $paypal.hide();
-    } else if (val === 'paypal'){
-        $('#credit-card').hide().removeClass('cc-selected');
-        $bitcoin.hide();
-        $paypal.show();
+// Show correct payment elements after selection and clear errors if they exist
+$('#payment').on('change', function() {
+    const paymentSelected = $(this).val();
+    $('#cc-num').attr('class','');
+    $('#zip').attr('class','');
+    $('#cvv').attr('class','');
+    $('.payment-error').remove();
+    if(paymentSelected === 'credit card') {
+        $('#credit-card').show();
+        $('option[value="credit card"]').addClass('selected');
+        $('div').last().hide();
+        $('div').last().prev().hide();
+    } else if(paymentSelected === 'paypal'){
+        $('#credit-card').hide();
+        $('option[value="credit card"]').removeClass('selected');
+        $('div').last().hide();
+        $('div').last().prev().show();
+    } else if(paymentSelected === 'bitcoin'){
+        $('#credit-card').hide();
+        $('option[value="credit card"]').removeClass('selected');
+        $('div').last().prev().hide();
+        $('div').last().show();
 
-    } else if (val === 'bitcoin'){
-        $('#credit-card').hide().removeClass('cc-selected');
-        $bitcoin.show();
-        $paypal.hide();  
     }
 });
 
-// Regex functions for validation, including 'live' validation for email field
+// Check email before page submit
 
-function legitEmail(email) {
-    // Email regex validation from emailregex.com
-    let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return regex.test(email);
-}
-
-function legitCreditCard(credit) {
-    let regex =/^[0-9]{13}(?:[0-9]{3})?$/;
-    return regex.test(credit);
-}
-
-function legitZip(zip) {
-    let regex =/^[0-9]{5}$/;
-    return regex.test(zip);
-}
-
-function legitCVV(cvv) {
-    let regex =/^[0-9]{3}$/;
-    return regex.test(cvv);
-}
-
-$emailField.on('keyup', function(){
-   if(!legitEmail($emailField.val())){
-       $emailField.addClass('not-valid');
-       $emailField.prev().append($emailCheck);
+$('#mail').on('keyup', function(){
+   if(!legitEmail($('#mail').val())){
+       $('#mail').attr('class', 'not-valid');
+       $('#mail').prev().append($emailCheck);
     } else {
-        $emailField.removeClass('not-valid');
-        $emailCheck.remove();
+        $('#mail').attr('class', '');
+        $('#email-error').remove();
     }
 });
 
-// Submit button validation and functionality
-$registerButton.on('click', function(e){
-    // Name field
-    if($nameField.val() === ''){
-        $nameField.attr('class', 'not-valid');
-        $nameField.prev().append($nameCheck);
+// Submit handler
+$('button[type="submit"]').on('click', function(e){
+   // Name field
+    if($('#name').val() === ''){
+        $('#name').attr('class', 'not-valid');
+        $('#name').prev().append($nameCheck);
+
     } else {
-        $nameField.attr('class', '');
+        $('#name').attr('class', false);
         $nameCheck.remove();
     }
     // Email field
-   if(!legitEmail($emailField.val())){
-       $emailField.attr('class', 'not-valid');
-       $emailField.prev().append($emailCheck);
+    if(!legitEmail($('#mail').val())){
+       $('#mail').attr('class', 'not-valid');
+       $('#mail').prev().append($emailCheck);
    } else {
        $('#mail').attr('class', '');
        $emailCheck.remove();
@@ -232,37 +219,62 @@ $registerButton.on('click', function(e){
             isChecked = true;
         }
     });
-        if(!isChecked){
+    if(!isChecked){
         $('.activities').prepend($activityCheck);
-        } else {
+    } else {
         $activityCheck.remove();
+    }
+    // Payment section
+    if($('option[value="credit card"]').hasClass('selected')) {
+        const $creditNum = $('#cc-num').val();
+        const $zipNum = $('#zip').val();
+        const $cvvNum = $('#cvv').val();
+        const valid = ($numVal, field) => {
+            let value = false;
+            let message = "";
+            let validate = "";
+            if (field === "cc") {
+                value = ($numVal.toString().length < 13) || ($numVal.toString().length > 16);
+                if ($numVal.toString().length === 0) {
+                    message = "Credit card number needed.";
+                } else {
+                    message = "Credit card numbers MUST be between 13 an 16 numbers.";
+                }
+                validate = "cc-num";
+            } else if (field === 'zip') {
+                value = ($numVal.toString().length !== 5);
+                if ($numVal.toString().length === 0) {
+                    message = "Please enter a zip code.";
+                } else {
+                    message = "Please enter 5 digit zip code."
+                }
+                validate = field;
+            } else if (field === 'cvv') {
+                value = ($numVal.toString().length !== 3);
+                if ($numVal.toString().length === 0) {
+                    message = "Please enter a credit CVV code.";
+                } else {
+                    message = "Please enter 3 digit CVV code on back of card."
+                }
+                validate = field;
+            }
+            if (!($.isNumeric($numVal)) || value) {
+                $(`#${validate}`).attr('class', 'not-valid');
+                if ($(`#${field}-num-error`).length) {
+                    $(`#${field}-num-error`).remove();
+                }
+                $('#credit-card').after($(`<span class="payment-error" id="${field}-num-error">${message}</span>`));
+            } else {
+                $(`#${validate}`).attr('class', '');
+                $(`#${field}-num-error`).remove();
+            }
         }
-        // Credit card section
-    if ($('#credit-card').hasClass('cc-selected')&&($('#cc-num').val() === '')) {
-        $ccNum.attr('class', 'not-valid');
-        $registerButton.prev().append($ccCheck);
-    } else if ($('#credit-card').hasClass('cc-selected')&&($ccNum.val() != '' || $ccNum.val() > 13 || $ccNum.val() < 16)) {
-        $ccCheck.remove();
-        $registerButton.prev().append($ccNumCheck);
-    } else {
-        $('#cc-num').attr('class', '');
-        $ccNumCheck.remove();
+        valid($creditNum, "cc");
+        valid($zipNum, "zip");
+        valid($cvvNum, "cvv");
     }
-    if($('#credit-card').hasClass('cc-selected')&&!legitZip($zipField.val())) {
-        $zipField.attr('class', 'not-valid');
-        $registerButton.prev().append($zipCheck);
-    } else {
-        $zipField.attr('class', '');
-        $zipCheck.remove();
-    }
-    if($('#credit-card').hasClass('cc-selected')&&(!legitCVV($cvvField.val()))) {
-        $cvvField.attr('class', 'not-valid');
-        $registerButton.prev().append($cvvCheck);
-    } else {
-        $cvvField.attr('class', '');
-        $cvvCheck.remove();
-    }
-    if(!((document.querySelectorAll('.not-valid').length === 0)&&(document.querySelectorAll('.error-message').length === 0))){
+    // Cancel page refresh if errors exist
+    if(!((document.querySelectorAll('.error-message').length === 0)&&(document.querySelectorAll('.not-valid').length === 0))){
         e.preventDefault();
     }
 });
